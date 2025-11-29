@@ -1,11 +1,13 @@
 # /workspace/application/app.py
 from flask import Flask, jsonify, render_template
 from models import db, Brand, Model, Category, Characteristic, SpuData
+from flask import request
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///spu_data.db'
 db.init_app(app)
-
+with app.app_context():
+    db.create_all()
 @app.route('/api/brands')
 def get_brands():
     return jsonify([{'id': b.id, 'name': b.name} for b in Brand.query.all()])
@@ -27,7 +29,7 @@ def get_spu_ids():
     brand_id = request.args.get('brand_id')
     model_id = request.args.get('model_id')
     category_id = request.args.get('category_id')
-    characteristic_id = request.args.get('characteristic_id')
+    characteristic_id = request.args.get('spu_characteristics_id')
 
     query = SpuData.query
 
