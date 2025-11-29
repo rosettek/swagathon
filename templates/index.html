@@ -13,17 +13,71 @@
 
         <form method="GET" action="{{ url_for('search') }}" class="mb-4">
             <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Введите название, модель, характеристики..." required>
+                <input type="text" name="q" class="form-control" placeholder="Введите название, модель, характеристики..." value="{{ request.args.get('q', '') }}">
                 <button class="btn btn-primary" type="submit">Найти</button>
             </div>
         </form>
 
+        <!-- Кнопки для добавления фильтров -->
+        <div class="mb-3">
+            <label class="form-label">Фильтры:</label>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="name">Название</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="model">Модель</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="country">Страна происхождения</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="manufacturer">Производитель</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="category">Название категории</button>
+            </div>
+        </div>
+
+        <!-- Контейнер для активных фильтров -->
+        <div id="active-filters" class="mb-4">
+            <!-- Здесь будут отображаться активные фильтры -->
+        </div>
+
         <!-- Сюда позже подставим результаты -->
         <div id="results">
-            {% if query %}
-                <p class="text-muted">Вы искали: <strong>{{ query }}</strong></p>
-                <!-- Пока просто заглушка -->
-                <div class="alert alert-info">Результаты поиска появятся здесь после реализации логики.</div>
+            {% if query or filters %}
+                <p class="text-muted">
+                    Результаты поиска:
+                    {% if query %}<strong>{{ query }}</strong>{% endif %}
+                    {% if filters %}
+                        {% for field, value in filters.items() %}
+                            {% if value %} | {{ field }}: <strong>{{ value }}</strong>{% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </p>
+                
+                {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID СТЭ</th>
+                                    <th>Название</th>
+                                    <th>Модель</th>
+                                    <th>Страна происхождения</th>
+                                    <th>Производитель</th>
+                                    <th>Название категории</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ste in results %}
+                                <tr>
+                                    <td>{{ ste.id }}</td>
+                                    <td>{{ ste.name or '' }}</td>
+                                    <td>{{ ste.model or '' }}</td>
+                                    <td>{{ ste.country or '' }}</td>
+                                    <td>{{ ste.manufacturer or '' }}</td>
+                                    <td>{{ ste.category_name or '' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">По вашему запросу и фильтрам ничего не найдено.</div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

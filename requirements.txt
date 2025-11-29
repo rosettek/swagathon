@@ -8,4 +8,4 @@ Whoosh==2.7.4
 pandas==2.2.2
 openpyxl==3.1.5
 pymorphy2==0.9.1
-pymorphy2-dicts-ru==2.4.410102.4314376
+pymorphy2-dicts-ru==2.4.417127.4579844
