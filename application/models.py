@@ -1,70 +1,36 @@
-# app/models.py
+# /workspace/application/models.py
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import TEXT
 
 db = SQLAlchemy()
 
-class Category(db.Model):
-    __tablename__ = 'categories'
-    id = db.Column(TEXT, primary_key=True)
-    name = db.Column(db.Text, nullable=False)
+class Brand(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
+    spu_data = db.relationship('SpuData', backref='brand', lazy=True)
 
 class Model(db.Model):
-    __tablename__ = 'models'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
 
-class Manufacturer(db.Model):
-    __tablename__ = 'manufacturers'
+    spu_data = db.relationship('SpuData', backref='model', lazy=True)
+
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
 
-class Country(db.Model):
-    __tablename__ = 'countries'
+    spu_data = db.relationship('SpuData', backref='category', lazy=True)
+
+class Characteristic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
 
-class CharacteristicKey(db.Model):
-    __tablename__ = 'characteristic_keys'
+    spu_data = db.relationship('SpuData', backref='characteristic', lazy=True)
+
+class SpuData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False, unique=True)
-
-class Unit(db.Model):
-    __tablename__ = 'units'
-    id = db.Column(db.Integer, primary_key=True)
-    symbol = db.Column(db.Text, nullable=False, unique=True)
-
-class CharacteristicValue(db.Model):
-    __tablename__ = 'characteristic_values'
-    id = db.Column(db.Integer, primary_key=True)
-    key_id = db.Column(db.Integer, db.ForeignKey('characteristic_keys.id'), nullable=False)
-    value_text = db.Column(db.Text, nullable=False)
-    unit_id = db.Column(db.Integer, db.ForeignKey('units.id'))
-
-    key = db.relationship("CharacteristicKey", backref="values")
-    unit = db.relationship("Unit", backref="values")
-
-class SPU(db.Model):
-    __tablename__ = 'spu_data'
-    id = db.Column(db.Integer, primary_key=True)
-    spu_external_id = db.Column(TEXT, unique=True, nullable=False)
-    name = db.Column(db.Text, nullable=False)
-    image_url = db.Column(db.Text)
-    category_id = db.Column(TEXT, db.ForeignKey('categories.id'), nullable=False)
-    model_id = db.Column(db.Integer, db.ForeignKey('models.id'))
-    manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturers.id'))
-    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'))
-    normalized_name = db.Column(db.Text)
-    normalized_category = db.Column(db.Text)
-
-    category = db.relationship("Category")
-    model = db.relationship("Model")
-    manufacturer = db.relationship("Manufacturer")
-    country = db.relationship("Country")
-
-# Связь многие-ко-многим
-spu_characteristics = db.Table(
-    'spu_characteristics',
-    db.Column('spu_id', db.Integer, db.ForeignKey('spu_data.id'), primary_key=True),
-    db.Column('char_value_id', db.Integer, db.ForeignKey('characteristic_values.id'), primary_key=True)
-)
+    spu_id = db.Column(db.String(50), nullable=False, unique=True)
+    brand_id = db.Column(db.Integer, db.ForeignKey('brand.id'), nullable=False)
+    model_id = db.Column(db.Integer, db.ForeignKey('model.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    characteristic_id = db.Column(db.Integer, db.ForeignKey('characteristic.id'), nullable=False)

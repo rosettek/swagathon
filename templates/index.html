@@ -1,87 +1,82 @@
+<!-- /workspace/application/templates/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Поиск СТЕ — Tender Hack Казань</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Фильтр SPU ID</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Поиск стандартных товарных единиц (СТЕ)</h1>
+    <h1>Фильтр по параметрам</h1>
+    <label>Бренд:</label>
+    <select id="brand-select">
+        <option value="">Выберите бренд</option>
+    </select>
 
-        <form method="GET" action="{{ url_for('search') }}" class="mb-4">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Введите название, модель, характеристики..." value="{{ request.args.get('q', '') }}">
-                <button class="btn btn-primary" type="submit">Найти</button>
-            </div>
-        </form>
+    <label>Модель:</label>
+    <select id="model-select">
+        <option value="">Выберите модель</option>
+    </select>
 
-        <!-- Кнопки для добавления фильтров -->
-        <div class="mb-3">
-            <label class="form-label">Фильтры:</label>
-            <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="name">Название</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="model">Модель</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="country">Страна происхождения</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="manufacturer">Производитель</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-field="category">Название категории</button>
-            </div>
-        </div>
+    <label>Категория:</label>
+    <select id="category-select">
+        <option value="">Выберите категорию</option>
+    </select>
 
-        <!-- Контейнер для активных фильтров -->
-        <div id="active-filters" class="mb-4">
-            <!-- Здесь будут отображаться активные фильтры -->
-        </div>
+    <label>Характеристика:</label>
+    <select id="characteristic-select">
+        <option value="">Выберите характеристику</option>
+    </select>
 
-        <!-- Сюда позже подставим результаты -->
-        <div id="results">
-            {% if query or filters %}
-                <p class="text-muted">
-                    Результаты поиска:
-                    {% if query %}<strong>{{ query }}</strong>{% endif %}
-                    {% if filters %}
-                        {% for field, value in filters.items() %}
-                            {% if value %} | {{ field }}: <strong>{{ value }}</strong>{% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </p>
-                
-                {% if results %}
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID СТЭ</th>
-                                    <th>Название</th>
-                                    <th>Модель</th>
-                                    <th>Страна происхождения</th>
-                                    <th>Производитель</th>
-                                    <th>Название категории</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ste in results %}
-                                <tr>
-                                    <td>{{ ste.id }}</td>
-                                    <td>{{ ste.name or '' }}</td>
-                                    <td>{{ ste.model or '' }}</td>
-                                    <td>{{ ste.country or '' }}</td>
-                                    <td>{{ ste.manufacturer or '' }}</td>
-                                    <td>{{ ste.category_name or '' }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning">По вашему запросу и фильтрам ничего не найдено.</div>
-                {% endif %}
-            {% endif %}
-        </div>
+    <div id="spu-list">
+        <h2>SPU ID:</h2>
+        <p>Результаты будут отображены здесь.</p>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function loadOptions(url, selectId) {
+            $.get(url, function(data) {
+                const select = $(selectId);
+                select.empty();
+                select.append('<option value="">Выберите значение</option>');
+                data.forEach(item => {
+                    select.append(`<option value="${item.id}">${item.name}</option>`);
+                });
+            });
+        }
+
+        $(document).ready(function() {
+            loadOptions('/api/brands', '#brand-select');
+            loadOptions('/api/models', '#model-select');
+            loadOptions('/api/categories', '#category-select');
+            loadOptions('/api/characteristics', '#characteristic-select');
+
+            $('select').change(function() {
+                const params = {};
+                const brandId = $('#brand-select').val();
+                const modelId = $('#model-select').val();
+                const categoryId = $('#category-select').val();
+                const characteristicId = $('#characteristic-select').val();
+
+                if (brandId) params.brand_id = brandId;
+                if (modelId) params.model_id = modelId;
+                if (categoryId) params.category_id = categoryId;
+                if (characteristicId) params.characteristic_id = characteristicId;
+
+                $.get('/api/spu_ids', params, function(data) {
+                    const list = $('#spu-list');
+                    list.empty();
+                    list.append('<h2>SPU ID:</h2>');
+                    if (data.length === 0) {
+                        list.append('<p>Нет совпадений.</p>');
+                    } else {
+                        data.forEach(id => {
+                            list.append(`<p>${id}</p>`);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
