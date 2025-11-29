@@ -28,7 +28,7 @@ services:
           echo 'Waiting for PostgreSQL...';
           sleep 2;
         done;
-        flask db upgrade &&
+        flask db upgrade;
         python run.py
       "
 
