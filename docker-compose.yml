@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    ports:                    # ← ЭТА СТРОКА ОБЯЗАТЕЛЬНА
+      - "5432:5432"           # ← пробрасывает порт на localhost
+    environment:
+      POSTGRES_DB: tenderhack
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      #- ./init_test_data.sql:/docker-entrypoint-initdb.d/init_test_data.sql
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tenderhack
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+        while ! pg_isready -h db -U postgres; do
+          echo 'Waiting for PostgreSQL...';
+          sleep 2;
+        done;
+        flask db upgrade &&
+        python run.py
+      "
+
+volumes:
+  postgres_data:
