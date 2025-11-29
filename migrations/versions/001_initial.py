@@ -82,7 +82,7 @@ def upgrade():
         sa.Column('spu_external_id', sa.Text(), nullable=False),
         sa.Column('name', sa.Text(), nullable=False),
         sa.Column('image_url', sa.Text(), nullable=True),
-        sa.Column('category_id', sa.Text(), nullable=False),
+        sa.Column('category_id', sa.Integer(), nullable=False),
         sa.Column('model_id', sa.Integer(), nullable=True),
         sa.Column('manufacturer_id', sa.Integer(), nullable=True),
         sa.Column('country_id', sa.Integer(), nullable=True),

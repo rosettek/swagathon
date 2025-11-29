@@ -44,10 +44,10 @@ class CharacteristicValue(db.Model):
     key = db.relationship("CharacteristicKey", backref="values")
     unit = db.relationship("Unit", backref="values")
 
-class STE(db.Model):
-    __tablename__ = 'stes'
+class SPU(db.Model):
+    __tablename__ = 'spu_data'
     id = db.Column(db.Integer, primary_key=True)
-    ste_external_id = db.Column(TEXT, unique=True, nullable=False)
+    spu_external_id = db.Column(TEXT, unique=True, nullable=False)
     name = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.Text)
     category_id = db.Column(TEXT, db.ForeignKey('categories.id'), nullable=False)
@@ -63,8 +63,8 @@ class STE(db.Model):
     country = db.relationship("Country")
 
 # Связь многие-ко-многим
-ste_characteristics = db.Table(
-    'ste_characteristics',
-    db.Column('ste_id', db.Integer, db.ForeignKey('stes.id'), primary_key=True),
+spu_characteristics = db.Table(
+    'spu_characteristics',
+    db.Column('spu_id', db.Integer, db.ForeignKey('spu_data.id'), primary_key=True),
     db.Column('char_value_id', db.Integer, db.ForeignKey('characteristic_values.id'), primary_key=True)
 )
